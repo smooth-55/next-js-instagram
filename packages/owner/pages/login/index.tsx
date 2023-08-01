@@ -1,6 +1,5 @@
 import React from "react"
 import Head from "next/head"
-import RestrictedRoute from "../../withRestrictedRoute"
 import { FormFooter, GetApp, LoginForm } from "../../components"
 
 import Link from "next/link";
@@ -50,4 +49,4 @@ const LoginPage = () => {
   );
 };
 
-export default RestrictedRoute(LoginPage);
+export default LoginPage;
