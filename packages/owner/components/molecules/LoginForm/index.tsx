@@ -1,18 +1,18 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
 import { useRouter } from "next/router";
 import { useMutation } from "react-query";
 import { useFormik } from "formik";
-
 import { notification } from 'antd';
 import { LoginUser } from "../../../services";
 import { Button, Form } from "../../atoms";
+import { AuthContext } from "../../../utils";
 
 
 const LoginForm = () => {
-
     const router = useRouter()
     const [passwordIsHide, setPasswordIsHide] = useState(true);
+    const { setAuthenticated, setUser, setLoading } = useContext(AuthContext)
     const initialValues = {
         email_or_username: "",
         password: "",
@@ -22,9 +22,7 @@ const LoginForm = () => {
         LoginUser,
         {
             onSuccess: (data) => {
-                console.log(data, "data")
-
-                const { access_token, refresh_token } = data?.data?.data
+                const { access_token, refresh_token, user } = data?.data?.data
                 if (access_token && refresh_token) {
                     localStorage.setItem("USER_ACCESS_TOKEN", access_token)
                     localStorage.setItem("USER_REFRESH_TOKEN", refresh_token)
@@ -32,12 +30,13 @@ const LoginForm = () => {
                 notification.success({
                     message: "Login success"
                 })
-                // router.push("/")
+                setUser(user)
+                setAuthenticated(true)
+                setLoading(false)
+                router.push("/")
             },
             onError: (error: any) => {
-                console.log(error)
                 notification.error({
-
                     message: error?.response?.data?.error
                 })
             }
@@ -47,8 +46,6 @@ const LoginForm = () => {
     const formik = useFormik({
         initialValues: initialValues,
         onSubmit: (values, actions) => {
-            console.log(values, "val");
-
             mutateLogin(values)
             actions.resetForm()
         },
@@ -68,7 +65,7 @@ const LoginForm = () => {
 
 
     return (
-        <Form onSubmit={formik?.handleSubmit}>
+        <Form >
             <label className={`input-box ${inputActiveClass(formik?.values?.email_or_username)}`}>
                 <input
                     className="input"
@@ -76,6 +73,7 @@ const LoginForm = () => {
                     value={formik?.values?.email_or_username}
                     onChange={formik?.handleChange}
                     type="text"
+                    autoComplete={"off"}
                 />
                 <span>Phone number, username, or email</span>
             </label>
@@ -86,6 +84,7 @@ const LoginForm = () => {
                     value={formik?.values?.password}
                     onChange={formik?.handleChange}
                     type={passwordIsHide ? "password" : "text"}
+                    autoComplete={"off"}
                 />
                 <span>Password</span>
                 <button
@@ -96,7 +95,10 @@ const LoginForm = () => {
                     {passwordIsHide ? "Show" : "Hide"}
                 </button>
             </label>
-            <Button disabled={!formControl()}>Log In</Button>
+            <Button disabled={!formControl()} type="submit" onClick={(e) => {
+                e.preventDefault()
+                formik?.handleSubmit()
+            }}>Log In</Button>
         </Form>
     );
 };
