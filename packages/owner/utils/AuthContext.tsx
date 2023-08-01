@@ -1,33 +1,69 @@
-import { createContext } from "react"
+import { createContext, Dispatch, SetStateAction } from "react"
 
 type ContextProps = {
-  loading: boolean
-  user: any | null
-  authenticated: boolean
-  setUser: any
-  isOwner: boolean
+  loading?: boolean
+  user?: UserInfoProps
+  authenticated?: boolean
+  setUser?: Dispatch<any>
+  logout?: () => void
+  setAuthenticated?: (auth: boolean) => void
+  children: React.ReactNode
+  setLoading?: Dispatch<SetStateAction<boolean>>
+}
+
+type AuthProviderProps = {
+  loading?: boolean
+  user?: UserInfoProps
+  setUser?: Dispatch<any>
+  children?: React.ReactNode
+  setLoading?: Dispatch<SetStateAction<boolean>>
+  authenticated?: boolean
+  setAuthenticated?: Dispatch<SetStateAction<boolean>>
+}
+export interface UserDetailProps {
+  id: Number
+  username: string
+  email: string
+  full_name: string
+  phone: string
+  gender: string
+  is_private: boolean
+}
+
+export interface UserInfoProps {
+  id: Number
+  username: string
+  email: string
+  full_name: string
+  phone: string
+  gender: string
+  is_private: boolean,
+  my_followers?: UserDetailProps[]
+  my_following?: UserDetailProps[]
 }
 
 export const AuthContext = createContext<Partial<ContextProps>>({})
 
-type AuthProviderProps = {
-  loading: boolean
-  user: any | null
-  setUser: any
-  isOwner: boolean
-  children: React.ReactNode
-}
 
-export const AuthProvider = (props: AuthProviderProps) => {
-  const { loading, user, setUser, children, isOwner } = props
+export const AuthProvider = ({
+  user,
+  loading,
+  setUser,
+  children,
+  setLoading,
+  authenticated,
+  setAuthenticated
+}: AuthProviderProps) => {
   return (
     <AuthContext.Provider
       value={{
-        loading,
+        authenticated,
+        setAuthenticated,
         user,
-        authenticated: user !== null,
         setUser,
-        isOwner,
+        children,
+        setLoading,
+        loading
       }}
     >
       {children}
