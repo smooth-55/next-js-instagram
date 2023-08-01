@@ -41,7 +41,6 @@ const RegisterForm = () => {
         CreateUser,
         {
             onSuccess: (data) => {
-                console.log(data, "data")
                 notification.success({
                     message: "Registration success"
                 })
@@ -50,7 +49,6 @@ const RegisterForm = () => {
             onError: (error: any) => {
                 console.log(error)
                 notification.error({
-
                     message: error?.response?.data?.error
                 })
             }
@@ -60,8 +58,7 @@ const RegisterForm = () => {
 
     const formik = useFormik({
         initialValues: initialValues,
-        onSubmit: (values, actions) => {
-            console.log(values, "val");
+        onSubmit: (values, actions,) => {
             mutateUser(values)
             actions.resetForm()
         },
@@ -69,7 +66,7 @@ const RegisterForm = () => {
 
 
     return (
-        <Form onSubmit={formik?.handleSubmit}>
+        <Form>
             <label className={`${inputActiveClass(formik?.values?.email)}`}>
                 <input
                     className="input"
@@ -121,7 +118,10 @@ const RegisterForm = () => {
                 </button>
             </label>
 
-            <Button disabled={!formControl()}>Sign Up</Button>
+            <Button disabled={!formControl()} type={"submit"} onClick={(e) => {
+                e.preventDefault()
+                formik?.handleSubmit()
+            }}>Sign Up</Button>
         </Form>
     );
 };
