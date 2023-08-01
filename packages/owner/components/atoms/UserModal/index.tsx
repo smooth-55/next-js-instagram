@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import styled from "styled-components";
 import { useOnClickOutside } from "@project/shared/src/hooks/UseOnClickOutside";
+import { useRouter } from "next/router";
 
 
 const StyledUserModal = styled.ul`
@@ -32,11 +33,21 @@ const StyledUserModal = styled.ul`
   li:last-child a {
     border-top: 1px solid rgba(#ddd, 0.5);
   }
+  .log__out:hover{
+    cursor: pointer;
+
+  }
 `;
 
 const UserModal = ({ setUserModal }) => {
     const ref = useRef();
+    const router = useRouter()
     useOnClickOutside(ref, () => setUserModal(false));
+    const HandleLogout = () => {
+        localStorage.clear()
+        router.push("/login")
+
+    }
 
     return (
         <StyledUserModal ref={ref}>
@@ -71,9 +82,9 @@ const UserModal = ({ setUserModal }) => {
                 </Link>
             </li>
             <li>
-                <Link href="/login">
+                <p className="log__out" onClick={() => { HandleLogout() }}>
                     <a>Log out</a>
-                </Link>
+                </p>
             </li>
         </StyledUserModal>
     );
