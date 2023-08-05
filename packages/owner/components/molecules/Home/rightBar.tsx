@@ -2,6 +2,9 @@ import Link from "next/link";
 
 import styled from "styled-components";
 import { Avatar } from "../../atoms";
+import { FollowSuggestions, FollowUser } from "../../../services";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { notification } from "antd";
 
 
 
@@ -116,99 +119,99 @@ const StyledRightBar = styled.div`
 
 
 const RightBar = () => {
-    return (
-        <StyledRightBar>
-            <div className="user">
-                <div>
-                    <Avatar />
-                    <div>
-                        <Link href="#">
-                            <a>mehmetsagirc</a>
-                        </Link>
-                        <span>mehmet</span>
-                    </div>
-                    <button>Switch</button>
-                </div>
-            </div>
+  const queryClient = useQueryClient()
+  const { data: suggestions } = useQuery("follow-suggestions", FollowSuggestions, {
+    onError: (error: any) => {
+      console.log("Something went wrong while fetching", error)
 
-            <div className="title">
-                <span>Suggestions For You</span>
-                <Link href="#">
-                    <a>See All</a>
-                </Link>
-            </div>
+      notification.error({
+        message: error?.message
+      })
 
-            <div className="user-list">
-                <div>
-                    <Avatar size="sm" />
-                    <div>
-                        <Link href="#">
-                            <a>username</a>
-                        </Link>
-                        <span>New to Instagram</span>
-                    </div>
-                    <button>Follow</button>
-                </div>
-                <div>
-                    <Avatar size="sm" />
-                    <div>
-                        <Link href="#">
-                            <a>username</a>
-                        </Link>
-                        <span>New to Instagram</span>
-                    </div>
-                    <button>Follow</button>
-                </div>
-                <div>
-                    <Avatar size="sm" />
-                    <div>
-                        <Link href="#">
-                            <a>username</a>
-                        </Link>
-                        <span>New to Instagram</span>
-                    </div>
-                    <button>Follow</button>
-                </div>
-                <div>
-                    <Avatar size="sm" />
-                    <div>
-                        <Link href="#">
-                            <a>username</a>
-                        </Link>
-                        <span>New to Instagram</span>
-                    </div>
-                    <button>Follow</button>
-                </div>
-                <div>
-                    <Avatar size="sm" />
-                    <div>
-                        <Link href="#">
-                            <a>username</a>
-                        </Link>
-                        <span>New to Instagram</span>
-                    </div>
-                    <button>Follow</button>
-                </div>
-            </div>
+    }
+  }
+  )
 
-            <footer>
-                <div className="links">
-                    <a>About</a>
-                    <a>Help</a>
-                    <a>Press</a>
-                    <a>API</a>
-                    <a>Jobs</a>
-                    <a>Privacy</a>
-                    <a>Terms</a>
-                    <a>Locations</a>
-                    <a>Top Accounts</a>
-                    <a>Hashtags</a>
-                    <a>Language</a>
-                </div>
-                <p className="copyright">© 2021 INSTAGRAM FROM FACEBOOK</p>
-            </footer>
-        </StyledRightBar>
-    );
+  const { mutate: follow } = useMutation(
+    FollowUser,
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('follow-suggestions')
+      },
+      onError: (error: any) => {
+        notification.error({
+          message: error?.message
+        })
+      }
+    }
+
+  )
+
+  const handleSuggestionFollow = (id: number) => {
+    follow({
+      follow_user_id: id
+    })
+
+
+  }
+
+  return (
+    <StyledRightBar>
+      <div className="user">
+        <div>
+          <Avatar />
+          <div>
+            <Link href="#">
+              <a>mehmetsagirc</a>
+            </Link>
+            <span>mehmet</span>
+          </div>
+          <button>Switch</button>
+        </div>
+      </div>
+
+      <div className="title">
+        <span>Suggestions For You</span>
+        <Link href="#">
+          <a>See All</a>
+        </Link>
+      </div>
+      {
+        suggestions?.data?.map((u: any) => <div className="user-list">
+          <div>
+            <Avatar size="sm" />
+            <div>
+              <Link href="#">
+                <a>{u?.full_name}</a>
+              </Link>
+              <span>New to Instagram</span>
+            </div>
+            <button onClick={() => handleSuggestionFollow(u?.user_id)}>Follow</button>
+          </div>
+        </div>)
+      }
+
+
+
+
+      <footer>
+        <div className="links">
+          <a>About</a>
+          <a>Help</a>
+          <a>Press</a>
+          <a>API</a>
+          <a>Jobs</a>
+          <a>Privacy</a>
+          <a>Terms</a>
+          <a>Locations</a>
+          <a>Top Accounts</a>
+          <a>Hashtags</a>
+          <a>Language</a>
+        </div>
+        <p className="copyright">© 2021 INSTAGRAM FROM FACEBOOK</p>
+      </footer>
+    </StyledRightBar>
+  );
 };
 
 export { RightBar };
