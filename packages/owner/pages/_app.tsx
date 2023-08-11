@@ -10,6 +10,7 @@ import { GlobalStyles, AuthProvider, UserInfoProps } from "../utils"
 import "../utils/css-imports"
 import Layout from "../components/molecules/Layout"
 import { useRouter } from "next/router"
+import WebsocketProvider from "../utils/WebsocketContext"
 
 const queryClient = new QueryClient({ defaultOptions: {} })
 
@@ -79,7 +80,9 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
             authenticated={authenticated}
             setAuthenticated={setAuthenticated}
           >
-            <Component {...pageProps} />
+            <WebsocketProvider>
+              <Component {...pageProps} />
+            </WebsocketProvider>
           </AuthProvider>
         </QueryClientProvider>
       </Layout>
