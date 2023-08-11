@@ -11,3 +11,8 @@ export const FollowUser = (val) => {
     return API.post(`/users/follow-user`, val)
 }
 
+
+export const MyConversations = () => {
+    return API.get(`/messages/get-all-conversations`)
+}
+
