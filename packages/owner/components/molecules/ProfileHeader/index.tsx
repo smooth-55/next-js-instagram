@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Link from "next/link";
 
 import { useRouter } from "next/router";
 
 import styled from "styled-components";
 import { Modal } from "../../atoms/Modal";
+import { AuthContext } from "../../../utils";
 
 const StyledHeader = styled.div`
   .user {
@@ -139,6 +140,7 @@ interface IProfileHeader {
 }
 
 const ProfileHeader: React.FC<IProfileHeader> = (props) => {
+  const { user } = useContext(AuthContext)
   const { username, full_name, total_posts, followers, following, bio, link, link_name, dp } = props
   const [isShowFollowersModal, setShowFollowersModal] = useState(false);
   const [isShowFollowingModal, setShowFollowingModal] = useState(false);
@@ -155,7 +157,7 @@ const ProfileHeader: React.FC<IProfileHeader> = (props) => {
         </label>
         <div className="content">
           <div>
-            <h2>{username}</h2>
+            <h2>{user?.username}</h2>
             <Link href="/accounts/edit">
               <a className="edit-button">Edit Profile</a>
             </Link>
@@ -181,7 +183,7 @@ const ProfileHeader: React.FC<IProfileHeader> = (props) => {
               <span>following</span>
             </li>
           </ul>
-          <p className="name">{full_name}</p>
+          <p className="name">{user?.full_name}</p>
           <p className="description">{bio}</p>
           <a href={`${link}`}>{link_name}</a>
         </div>
