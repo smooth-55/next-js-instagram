@@ -6,6 +6,9 @@ import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { WEBSOCKET_URL } from "../../../services/ws";
 import { AddPhoto, AudioCall, ChooseEmoji, ConvInfo, Like, VideoCall, VoiceClip } from "../../../contants";
+import { useQuery } from "react-query";
+import { GetAllMessagesByRoomId } from "../../../services";
+import { Loader } from "@project/shared";
 
 const StyledConv = styled.div`
 border-bottom: 1px solid #dbdbdb;
@@ -113,6 +116,36 @@ type Message = {
 const Conversation = (props) => {
     const { activeRoomId, activeUser, conn, setConn } = props
 
+    const {
+        data: room_messages,
+        isLoading: isConvLoading,
+        isFetching: isConvFetching,
+    } = useQuery<any, Error>(
+        ["get-room-conv", activeRoomId],
+        () => GetAllMessagesByRoomId(activeRoomId),
+        {
+            keepPreviousData: false,
+            refetchOnWindowFocus: false,
+            cacheTime: 0,
+            select: ({ data }) => {
+                const msgs = data?.map((o) => {
+                    return {
+                        content: o?.message,
+                        room_id: o?.room_id,
+                        user: o?.user,
+                        type: o?.message_by === user?.id ? "sent" : "received",
+                        created: o?.created_at
+                    }
+                })
+                setMessages(msgs)
+                return msgs
+            },
+        }
+    )
+
+    console.log(room_messages, "room_messages");
+
+
     useEffect(() => {
         const ws = new WebSocket(`${WEBSOCKET_URL}/ws/join-room/${activeRoomId}?user_id=${user?.id}`)
         if (ws.OPEN) {
@@ -180,16 +213,19 @@ const Conversation = (props) => {
                 </div>
             </header>
             <div className={"message__container"}>
-                <div className="messages">
-                    {
-                        messages?.map((obj) => {
-                            return <div className={obj?.type}>{obj?.content}</div>
-                        })
+                {
+                    isConvLoading || isConvFetching ? <Loader /> : (
+                        <div className="messages">
+                            {
+                                messages?.map((obj) => {
+                                    return <div className={obj?.type}>{obj?.content}</div>
+                                })
 
-                    }
+                            }
+                        </div>
+                    )
+                }
 
-
-                </div>
                 <form className={"type__message"} onSubmit={formik.handleSubmit}>
                     {ChooseEmoji}
                     <input
